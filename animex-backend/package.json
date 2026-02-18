@@ -1,0 +1,25 @@
+{
+    "name": "animex-backend",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "ts-node-dev --respawn api/index.ts",
+        "build": "tsc",
+        "start": "node dist/api/index.js"
+    },
+    "dependencies": {
+        "express": "^4.21.0",
+        "cors": "^2.8.5",
+        "@supabase/supabase-js": "^2.45.0",
+        "zod": "^3.23.0",
+        "resend": "^4.0.0",
+        "express-rate-limit": "^7.4.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.5.0",
+        "@types/node": "^20.14.0",
+        "@types/express": "^4.17.0",
+        "@types/cors": "^2.8.0",
+        "ts-node-dev": "^2.0.0"
+    }
+}
