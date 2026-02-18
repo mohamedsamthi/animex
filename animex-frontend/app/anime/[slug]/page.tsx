@@ -17,15 +17,15 @@ const demoAnime: Anime & { episodes: Episode[] } = {
     age_rating: 'PG', release_year: 2024, total_episodes: 24,
     status: 'ongoing', is_featured: true, is_trending: true,
     view_count: 250000, like_count: 18500,
-    created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+    created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z',
     episodes: Array.from({ length: 24 }, (_, i) => ({
         id: `ep-${i}`, anime_id: 'demo-1', episode_number: i + 1, season_number: 1,
         title: `Episode ${i + 1}: ${['The Beginning', 'First Battle', 'New Ally', 'Dark Forest', 'The Challenge'][i % 5]}`,
         description: 'An exciting episode in the adventure.', video_url: '', thumbnail_url: '',
-        duration_seconds: 1200 + Math.floor(Math.random() * 300),
+        duration_seconds: 1200 + (i * 37 % 300),
         subtitle_en_url: '', subtitle_si_url: '', subtitle_ta_url: '',
-        view_count: Math.floor(Math.random() * 50000), like_count: Math.floor(Math.random() * 5000),
-        is_free: true, created_at: new Date().toISOString(),
+        view_count: (i + 1) * 4500, like_count: (i + 1) * 450,
+        is_free: true, created_at: '2024-01-01T00:00:00Z',
     })),
 };
 

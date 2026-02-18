@@ -13,8 +13,8 @@ const demoAnime: Anime[] = Array.from({ length: 20 }, (_, i) => ({
     banner_url: '', trailer_url: '', genre: [GENRES[i % GENRES.length]],
     tags: [], age_rating: AGE_RATINGS[i % 3], release_year: 2024 - (i % 5),
     total_episodes: 12 + i * 2, status: i % 3 === 0 ? 'completed' : 'ongoing',
-    is_featured: false, is_trending: i < 5, view_count: Math.floor(Math.random() * 100000),
-    like_count: Math.floor(Math.random() * 10000), created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+    is_featured: false, is_trending: i < 5, view_count: (i + 1) * 12500,
+    like_count: (i + 1) * 1800, created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z',
 }));
 
 export default function BrowsePage() {

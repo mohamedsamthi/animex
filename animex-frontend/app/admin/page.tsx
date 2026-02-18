@@ -76,7 +76,7 @@ export default function AdminPage() {
                                             <div key={name} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
                                                 <span className="w-6 h-6 rounded bg-white/5 flex items-center justify-center text-xs font-heading font-bold text-white/40">{i + 1}</span>
                                                 <span className="flex-1 text-sm">{name}</span>
-                                                <span className="text-xs text-white/30">{Math.floor(Math.random() * 50000)} views</span>
+                                                <span className="text-xs text-white/30">{[45200, 38100, 32400, 28700, 19500][i]} views</span>
                                             </div>
                                         ))}
                                     </div>
@@ -252,8 +252,8 @@ export default function AdminPage() {
                                     <h3 className="font-heading text-sm font-semibold mb-4">Views Over Time</h3>
                                     <div className="h-48 flex items-end gap-1">
                                         {Array.from({ length: 14 }).map((_, i) => (
-                                            <div key={i} className="flex-1 bg-primary/20 rounded-t" style={{ height: `${30 + Math.random() * 70}%` }}>
-                                                <div className="w-full bg-primary rounded-t" style={{ height: `${50 + Math.random() * 50}%` }} />
+                                            <div key={i} className="flex-1 bg-primary/20 rounded-t" style={{ height: `${30 + ((i * 37 + 13) % 70)}%` }}>
+                                                <div className="w-full bg-primary rounded-t" style={{ height: `${50 + ((i * 23 + 7) % 50)}%` }} />
                                             </div>
                                         ))}
                                     </div>

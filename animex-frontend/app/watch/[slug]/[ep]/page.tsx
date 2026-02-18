@@ -22,10 +22,10 @@ export default function WatchPage({ params }: { params: { slug: string; ep: stri
         id: `ep-${i}`, anime_id: 'demo', episode_number: i + 1, season_number: 1,
         title: `Episode ${i + 1}: ${['The Awakening', 'Into Battle', 'New Power', 'Dark Secret', 'Final Stand'][i % 5]}`,
         description: 'An exciting episode.', video_url: '', thumbnail_url: '',
-        duration_seconds: 1200 + Math.floor(Math.random() * 300),
+        duration_seconds: 1200 + (i * 37 % 300),
         subtitle_en_url: '', subtitle_si_url: '', subtitle_ta_url: '',
-        view_count: Math.floor(Math.random() * 50000), like_count: Math.floor(Math.random() * 5000),
-        is_free: true, created_at: new Date().toISOString(),
+        view_count: (i + 1) * 4500, like_count: (i + 1) * 450,
+        is_free: true, created_at: '2024-01-01T00:00:00Z',
     }));
 
     const currentEp = demoEpisodes[epNumber - 1] || demoEpisodes[0];

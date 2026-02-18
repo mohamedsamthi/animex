@@ -27,10 +27,10 @@ const demoAnime: Anime[] = Array.from({ length: 10 }, (_, i) => ({
     status: i > 6 ? 'completed' : 'ongoing',
     is_featured: i < 3,
     is_trending: i < 5,
-    view_count: Math.floor(Math.random() * 500000) + 10000,
-    like_count: Math.floor(Math.random() * 50000) + 1000,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    view_count: [291600, 450200, 820100, 175300, 362400, 128900, 543700, 97800, 210500, 385100][i],
+    like_count: [34500, 48200, 51000, 22100, 39800, 15600, 42300, 8900, 19700, 31200][i],
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
 }));
 
 export default function HomePage() {

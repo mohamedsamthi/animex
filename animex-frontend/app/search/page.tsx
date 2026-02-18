@@ -14,8 +14,8 @@ const demoResults: Anime[] = Array.from({ length: 8 }, (_, i) => ({
     banner_url: '', trailer_url: '', genre: [GENRES[i % GENRES.length]],
     tags: [], age_rating: 'PG', release_year: 2024,
     total_episodes: 12 + i, status: 'ongoing', is_featured: false, is_trending: false,
-    view_count: Math.floor(Math.random() * 100000), like_count: Math.floor(Math.random() * 10000),
-    created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+    view_count: (i + 1) * 15000, like_count: (i + 1) * 2200,
+    created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z',
 }));
 
 function SearchContent() {
