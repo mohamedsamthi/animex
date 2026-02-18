@@ -1,4 +1,4 @@
--- AnimeX Database Schema
+-- AnimeX Database Schema (Idempotent - safe to re-run)
 -- Run this in your Supabase SQL editor to set up all tables
 
 -- Enable UUID extension
@@ -20,8 +20,11 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON profiles;
 CREATE POLICY "Public profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- =====================
@@ -52,7 +55,9 @@ CREATE TABLE IF NOT EXISTS anime (
 );
 
 ALTER TABLE anime ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anime is viewable by everyone" ON anime;
 CREATE POLICY "Anime is viewable by everyone" ON anime FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Only admins can manage anime" ON anime;
 CREATE POLICY "Only admins can manage anime" ON anime FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
 );
@@ -81,7 +86,9 @@ CREATE TABLE IF NOT EXISTS episodes (
 );
 
 ALTER TABLE episodes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Episodes are viewable by everyone" ON episodes;
 CREATE POLICY "Episodes are viewable by everyone" ON episodes FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Only admins can manage episodes" ON episodes;
 CREATE POLICY "Only admins can manage episodes" ON episodes FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
 );
@@ -98,7 +105,9 @@ CREATE TABLE IF NOT EXISTS likes (
 );
 
 ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Likes viewable by everyone" ON likes;
 CREATE POLICY "Likes viewable by everyone" ON likes FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users can manage own likes" ON likes;
 CREATE POLICY "Users can manage own likes" ON likes FOR ALL USING (auth.uid() = user_id);
 
 -- =====================
@@ -115,8 +124,11 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Comments viewable by everyone" ON comments;
 CREATE POLICY "Comments viewable by everyone" ON comments FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Auth users can create comments" ON comments;
 CREATE POLICY "Auth users can create comments" ON comments FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can delete own comments" ON comments;
 CREATE POLICY "Users can delete own comments" ON comments FOR DELETE USING (
   auth.uid() = user_id OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
 );
@@ -134,7 +146,9 @@ CREATE TABLE IF NOT EXISTS watchlist (
 );
 
 ALTER TABLE watchlist ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own watchlist" ON watchlist;
 CREATE POLICY "Users can view own watchlist" ON watchlist FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can manage own watchlist" ON watchlist;
 CREATE POLICY "Users can manage own watchlist" ON watchlist FOR ALL USING (auth.uid() = user_id);
 
 -- =====================
@@ -154,7 +168,9 @@ CREATE TABLE IF NOT EXISTS watch_history (
 );
 
 ALTER TABLE watch_history ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own history" ON watch_history;
 CREATE POLICY "Users can view own history" ON watch_history FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can manage own history" ON watch_history;
 CREATE POLICY "Users can manage own history" ON watch_history FOR ALL USING (auth.uid() = user_id);
 
 -- =====================
@@ -170,7 +186,9 @@ CREATE TABLE IF NOT EXISTS downloads (
 );
 
 ALTER TABLE downloads ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own downloads" ON downloads;
 CREATE POLICY "Users can view own downloads" ON downloads FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can manage own downloads" ON downloads;
 CREATE POLICY "Users can manage own downloads" ON downloads FOR ALL USING (auth.uid() = user_id);
 
 -- =====================
@@ -192,7 +210,9 @@ CREATE TABLE IF NOT EXISTS feedback (
 );
 
 ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can submit feedback" ON feedback;
 CREATE POLICY "Users can submit feedback" ON feedback FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Only admins can view feedback" ON feedback;
 CREATE POLICY "Only admins can view feedback" ON feedback FOR SELECT USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
 );
@@ -212,7 +232,9 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can view own notifications" ON notifications;
 CREATE POLICY "Users can view own notifications" ON notifications FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can update own notifications" ON notifications;
 CREATE POLICY "Users can update own notifications" ON notifications FOR UPDATE USING (auth.uid() = user_id);
 
 -- =====================
@@ -252,8 +274,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS profiles_updated_at ON profiles;
 CREATE TRIGGER profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS anime_updated_at ON anime;
 CREATE TRIGGER anime_updated_at BEFORE UPDATE ON anime FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+DROP TRIGGER IF EXISTS watch_history_updated_at ON watch_history;
 CREATE TRIGGER watch_history_updated_at BEFORE UPDATE ON watch_history FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- =====================
@@ -268,6 +293,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
