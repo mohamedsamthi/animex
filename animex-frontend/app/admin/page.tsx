@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -8,8 +8,9 @@ import {
     TrendingUp, Eye, Heart, UserPlus, AlertCircle, Plus, Search,
     ChevronRight, Shield, Clock, Star, ArrowUpRight, ArrowDownRight,
     Trash2, Flag, CheckCircle, XCircle, Edit3, MoreHorizontal,
-    Activity, Zap, Globe, Settings, Bell, Filter, Download,
+    Activity, Zap, Globe, Settings, Bell, Filter, Download, Loader2,
 } from 'lucide-react';
+import { fetchAllAnime, addAnime, deleteAnime, addEpisode, fetchEpisodes, generateSlug } from '@/lib/admin';
 
 // ─── STAT CARDS ─────────────────────────────
 const statCards = [
@@ -104,8 +105,8 @@ export default function AdminPage() {
                             {sidebarItems.slice(0, 4).map(item => (
                                 <button key={item.id} onClick={() => setActiveSection(item.id)}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 group ${activeSection === item.id
-                                            ? 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary font-medium shadow-lg shadow-primary/5 border border-primary/10'
-                                            : 'text-white/40 hover:text-white/80 hover:bg-white/[0.03]'
+                                        ? 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary font-medium shadow-lg shadow-primary/5 border border-primary/10'
+                                        : 'text-white/40 hover:text-white/80 hover:bg-white/[0.03]'
                                         }`}>
                                     <item.icon className={`w-4 h-4 transition-colors ${activeSection === item.id ? 'text-primary' : 'text-white/30 group-hover:text-white/60'}`} />
                                     {item.label}
@@ -119,8 +120,8 @@ export default function AdminPage() {
                             {sidebarItems.slice(4).map(item => (
                                 <button key={item.id} onClick={() => setActiveSection(item.id)}
                                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 group ${activeSection === item.id
-                                            ? 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary font-medium shadow-lg shadow-primary/5 border border-primary/10'
-                                            : 'text-white/40 hover:text-white/80 hover:bg-white/[0.03]'
+                                        ? 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary font-medium shadow-lg shadow-primary/5 border border-primary/10'
+                                        : 'text-white/40 hover:text-white/80 hover:bg-white/[0.03]'
                                         }`}>
                                     <item.icon className={`w-4 h-4 transition-colors ${activeSection === item.id ? 'text-primary' : 'text-white/30 group-hover:text-white/60'}`} />
                                     {item.label}
@@ -248,9 +249,9 @@ function DashboardSection() {
                             <motion.div key={anime.name} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.05 }}
                                 className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/[0.03] transition-colors group cursor-pointer">
                                 <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-heading font-bold ${i === 0 ? 'bg-gradient-to-br from-yellow-500 to-amber-600 text-white' :
-                                        i === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-dark' :
-                                            i === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white' :
-                                                'bg-white/5 text-white/30'
+                                    i === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-dark' :
+                                        i === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-white' :
+                                            'bg-white/5 text-white/30'
                                     }`}>{i + 1}</span>
                                 <span className="text-xl">{anime.poster}</span>
                                 <div className="flex-1 min-w-0">
@@ -277,10 +278,10 @@ function DashboardSection() {
                             <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 + i * 0.06 }}
                                 className="flex items-start gap-3">
                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${act.type === 'user' ? 'bg-blue-500/10 text-blue-400' :
-                                        act.type === 'upload' ? 'bg-green-500/10 text-green-400' :
-                                            act.type === 'flag' ? 'bg-red-500/10 text-red-400' :
-                                                act.type === 'feedback' ? 'bg-yellow-500/10 text-yellow-400' :
-                                                    'bg-purple/10 text-purple'
+                                    act.type === 'upload' ? 'bg-green-500/10 text-green-400' :
+                                        act.type === 'flag' ? 'bg-red-500/10 text-red-400' :
+                                            act.type === 'feedback' ? 'bg-yellow-500/10 text-yellow-400' :
+                                                'bg-purple/10 text-purple'
                                     }`}>
                                     {act.type === 'user' ? <UserPlus className="w-3.5 h-3.5" /> :
                                         act.type === 'upload' ? <Upload className="w-3.5 h-3.5" /> :
@@ -331,9 +332,9 @@ function DashboardSection() {
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
                                             <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-medium ${fb.type === 'bug' ? 'bg-red-500/10 text-red-400' :
-                                                    fb.type === 'feature' ? 'bg-blue-500/10 text-blue-400' :
-                                                        fb.type === 'compliment' ? 'bg-green-500/10 text-green-400' :
-                                                            'bg-purple/10 text-purple'
+                                                fb.type === 'feature' ? 'bg-blue-500/10 text-blue-400' :
+                                                    fb.type === 'compliment' ? 'bg-green-500/10 text-green-400' :
+                                                        'bg-purple/10 text-purple'
                                                 }`}>{fb.type}</span>
                                             <span className="text-[10px] text-white/20">{fb.time}</span>
                                         </div>
@@ -355,122 +356,151 @@ function DashboardSection() {
 }
 
 // ═══════════════════════════════════════════
-// MANAGE ANIME SECTION
+// MANAGE ANIME SECTION (FUNCTIONAL)
 // ═══════════════════════════════════════════
 function AnimeSection() {
+    const [animeList, setAnimeList] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [msg, setMsg] = useState('');
+    const [form, setForm] = useState({ title_en: '', description: '', genre: 'Action', age_rating: 'PG', release_year: 2024, total_episodes: 12, status: 'ongoing', poster_url: '', banner_url: '' });
+
+    const loadAnime = useCallback(async () => {
+        try { setLoading(true); const data = await fetchAllAnime(); setAnimeList(data); }
+        catch { setAnimeList([]); }
+        finally { setLoading(false); }
+    }, []);
+    useEffect(() => { loadAnime(); }, [loadAnime]);
+
+    const handleAdd = async () => {
+        if (!form.title_en) { setMsg('Title required!'); return; }
+        setSaving(true); setMsg('');
+        try {
+            await addAnime({ ...form, slug: generateSlug(form.title_en), genre: form.genre.split(',').map(g => g.trim()) });
+            setMsg('✅ Anime added!'); setShowAddForm(false); setForm({ title_en: '', description: '', genre: 'Action', age_rating: 'PG', release_year: 2024, total_episodes: 12, status: 'ongoing', poster_url: '', banner_url: '' }); loadAnime();
+        } catch (e: any) { setMsg('❌ ' + (e?.message || 'Failed')); }
+        finally { setSaving(false); }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Delete this anime?')) return;
+        try { await deleteAnime(id); loadAnime(); } catch { setMsg('❌ Delete failed'); }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-                    <input type="text" placeholder="Search anime..." className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-primary/30 transition-colors" />
-                </div>
-                <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-3 py-2.5 border border-white/[0.06] rounded-xl text-xs text-white/40 hover:text-white/60 hover:border-white/10 transition-colors">
-                        <Filter className="w-3.5 h-3.5" /> Filter
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary-600 rounded-xl text-xs font-medium shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
-                        <Plus className="w-3.5 h-3.5" /> Add Anime
-                    </button>
-                </div>
+                <p className="text-sm text-white/40">{animeList.length} anime in database</p>
+                <button onClick={() => setShowAddForm(!showAddForm)} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary to-primary-600 rounded-xl text-xs font-medium shadow-lg shadow-primary/20">
+                    <Plus className="w-3.5 h-3.5" /> {showAddForm ? 'Cancel' : 'Add Anime'}
+                </button>
             </div>
+            {msg && <div className="p-3 rounded-xl bg-white/[0.03] text-sm text-center">{msg}</div>}
 
-            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-                <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-white/[0.04]">
-                            {['Anime', 'Genre', 'Episodes', 'Status', 'Views', 'Rating', 'Actions'].map(h => (
-                                <th key={h} className="text-left text-[10px] uppercase tracking-wider text-white/25 p-4 font-medium">{h}</th>
+            {showAddForm && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-primary/10 bg-primary/[0.02] p-6 space-y-4">
+                    <h3 className="font-heading text-sm font-semibold">Add New Anime</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Title (English) *</label><input value={form.title_en} onChange={e => setForm({ ...form, title_en: e.target.value })} className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30" placeholder="Dragon Ball Z" /></div>
+                        <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Genres (comma separated)</label><input value={form.genre} onChange={e => setForm({ ...form, genre: e.target.value })} className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30" placeholder="Action, Fantasy" /></div>
+                    </div>
+                    <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Description</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30 resize-none h-20" placeholder="Anime description..." /></div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Age Rating</label><select value={form.age_rating} onChange={e => setForm({ ...form, age_rating: e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none"><option>G</option><option>PG</option><option>PG-13</option><option>R</option></select></div>
+                        <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Year</label><input type="number" value={form.release_year} onChange={e => setForm({ ...form, release_year: +e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none" /></div>
+                        <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Episodes</label><input type="number" value={form.total_episodes} onChange={e => setForm({ ...form, total_episodes: +e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none" /></div>
+                        <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Status</label><select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none"><option value="ongoing">Ongoing</option><option value="completed">Completed</option><option value="upcoming">Upcoming</option></select></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Poster URL</label><input value={form.poster_url} onChange={e => setForm({ ...form, poster_url: e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-white focus:outline-none focus:border-primary/30" placeholder="https://..." /></div>
+                        <div><label className="text-[10px] uppercase text-white/30 mb-1 block">Banner URL</label><input value={form.banner_url} onChange={e => setForm({ ...form, banner_url: e.target.value })} className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-white focus:outline-none focus:border-primary/30" placeholder="https://..." /></div>
+                    </div>
+                    <button onClick={handleAdd} disabled={saving} className="w-full py-3 bg-gradient-to-r from-primary to-primary-600 rounded-xl text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2">
+                        {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : <><Plus className="w-4 h-4" /> Add Anime</>}
+                    </button>
+                </motion.div>
+            )}
+
+            {loading ? <div className="text-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" /></div> : animeList.length === 0 ? (
+                <div className="text-center py-16 rounded-2xl border border-white/[0.06] bg-white/[0.02]"><Film className="w-12 h-12 text-white/10 mx-auto mb-3" /><p className="text-sm text-white/30">No anime yet. Click &quot;Add Anime&quot; to start!</p></div>
+            ) : (
+                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+                    <table className="w-full">
+                        <thead><tr className="border-b border-white/[0.04]">{['Title', 'Genre', 'Episodes', 'Status', 'Views', 'Actions'].map(h => <th key={h} className="text-left text-[10px] uppercase tracking-wider text-white/25 p-4">{h}</th>)}</tr></thead>
+                        <tbody>
+                            {animeList.map(a => (
+                                <tr key={a.id} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors group">
+                                    <td className="p-4"><p className="text-sm font-medium">{a.title_en}</p><p className="text-[10px] text-white/20">{a.slug}</p></td>
+                                    <td className="p-4"><span className="text-[10px] px-2 py-1 rounded-full bg-primary/10 text-primary/70">{(a.genre || []).join(', ')}</span></td>
+                                    <td className="p-4 text-xs text-white/40">{a.total_episodes}</td>
+                                    <td className="p-4"><span className={`text-[10px] px-2 py-1 rounded-full ${a.status === 'completed' ? 'bg-green-500/10 text-green-400' : 'bg-blue-500/10 text-blue-400'}`}>{a.status}</span></td>
+                                    <td className="p-4 text-xs text-white/40">{(a.view_count || 0).toLocaleString()}</td>
+                                    <td className="p-4"><button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-white/20 hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button></td>
+                                </tr>
                             ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {topAnime.map((anime, i) => (
-                            <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors group">
-                                <td className="p-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-lg">{anime.poster}</span>
-                                        <div>
-                                            <p className="text-sm font-medium group-hover:text-primary transition-colors">{anime.name}</p>
-                                            <p className="text-[10px] text-white/25">ID: anime-{i}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="p-4"><span className="text-[10px] px-2 py-1 rounded-full bg-primary/10 text-primary/70">Action, Fantasy</span></td>
-                                <td className="p-4 text-xs text-white/40">{anime.eps}</td>
-                                <td className="p-4"><span className="text-[10px] px-2 py-1 rounded-full bg-green-500/10 text-green-400">Ongoing</span></td>
-                                <td className="p-4 text-xs text-white/40">{anime.views.toLocaleString()}</td>
-                                <td className="p-4">
-                                    <div className="flex gap-0.5">{Array.from({ length: 5 }).map((_, s) => <Star key={s} className={`w-2.5 h-2.5 ${s < 4 ? 'text-yellow-400 fill-yellow-400' : 'text-white/10'}`} />)}</div>
-                                </td>
-                                <td className="p-4">
-                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button className="p-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-primary transition-colors"><Edit3 className="w-3.5 h-3.5" /></button>
-                                        <button className="p-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                                        <button className="p-1.5 rounded-lg hover:bg-white/5 text-white/30 hover:text-white transition-colors"><MoreHorizontal className="w-3.5 h-3.5" /></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }
 
 // ═══════════════════════════════════════════
-// UPLOAD SECTION
+// UPLOAD SECTION (FUNCTIONAL)
 // ═══════════════════════════════════════════
 function UploadSection() {
+    const [animeList, setAnimeList] = useState<any[]>([]);
+    const [saving, setSaving] = useState(false);
+    const [msg, setMsg] = useState('');
+    const [ep, setEp] = useState({ anime_id: '', title: '', episode_number: 1, season_number: 1, video_url: '', duration_seconds: 1200, thumbnail_url: '', subtitle_en_url: '', subtitle_si_url: '', subtitle_ta_url: '' });
+
+    useEffect(() => { fetchAllAnime().then(setAnimeList).catch(() => { }); }, []);
+
+    const handleUpload = async () => {
+        if (!ep.anime_id) { setMsg('❌ Select an anime first!'); return; }
+        if (!ep.title) { setMsg('❌ Episode title required!'); return; }
+        if (!ep.video_url) { setMsg('❌ Video URL required!'); return; }
+        setSaving(true); setMsg('');
+        try {
+            await addEpisode(ep);
+            setMsg('✅ Episode uploaded successfully!');
+            setEp({ ...ep, title: '', episode_number: ep.episode_number + 1, video_url: '', thumbnail_url: '' });
+        } catch (e: any) { setMsg('❌ ' + (e?.message || 'Upload failed')); }
+        finally { setSaving(false); }
+    };
+
     return (
         <div className="max-w-2xl">
-            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 md:p-8 space-y-6">
+            {msg && <div className="p-3 rounded-xl bg-white/[0.03] text-sm text-center mb-4">{msg}</div>}
+            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 md:p-8 space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label className="text-[11px] uppercase tracking-wider text-white/30 mb-2 block">Select Anime</label>
-                        <select className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30 appearance-none cursor-pointer">
-                            <option>Dragon Quest</option><option>Naruto</option><option>One Piece</option>
+                        <label className="text-[10px] uppercase tracking-wider text-white/30 mb-1 block">Select Anime *</label>
+                        <select value={ep.anime_id} onChange={e => setEp({ ...ep, anime_id: e.target.value })} className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30">
+                            <option value="">-- Select --</option>
+                            {animeList.map(a => <option key={a.id} value={a.id}>{a.title_en}</option>)}
                         </select>
                     </div>
-                    <div>
-                        <label className="text-[11px] uppercase tracking-wider text-white/30 mb-2 block">Episode Title</label>
-                        <input type="text" placeholder="Episode title" className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-primary/30" />
-                    </div>
+                    <div><label className="text-[10px] uppercase tracking-wider text-white/30 mb-1 block">Episode Title *</label><input value={ep.title} onChange={e => setEp({ ...ep, title: e.target.value })} placeholder="The Beginning" className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-primary/30" /></div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
-                    <div>
-                        <label className="text-[11px] uppercase tracking-wider text-white/30 mb-2 block">Episode #</label>
-                        <input type="number" placeholder="1" className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30" />
-                    </div>
-                    <div>
-                        <label className="text-[11px] uppercase tracking-wider text-white/30 mb-2 block">Season</label>
-                        <input type="number" placeholder="1" className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30" />
-                    </div>
-                    <div>
-                        <label className="text-[11px] uppercase tracking-wider text-white/30 mb-2 block">Duration (s)</label>
-                        <input type="number" placeholder="1200" className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30" />
-                    </div>
+                    <div><label className="text-[10px] uppercase tracking-wider text-white/30 mb-1 block">Episode #</label><input type="number" value={ep.episode_number} onChange={e => setEp({ ...ep, episode_number: +e.target.value })} className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30" /></div>
+                    <div><label className="text-[10px] uppercase tracking-wider text-white/30 mb-1 block">Season</label><input type="number" value={ep.season_number} onChange={e => setEp({ ...ep, season_number: +e.target.value })} className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30" /></div>
+                    <div><label className="text-[10px] uppercase tracking-wider text-white/30 mb-1 block">Duration (s)</label><input type="number" value={ep.duration_seconds} onChange={e => setEp({ ...ep, duration_seconds: +e.target.value })} className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white focus:outline-none focus:border-primary/30" /></div>
                 </div>
-                <div>
-                    <label className="text-[11px] uppercase tracking-wider text-white/30 mb-2 block">Video URL</label>
-                    <input type="url" placeholder="https://..." className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-primary/30" />
-                </div>
-                <div>
-                    <label className="text-[11px] uppercase tracking-wider text-white/30 mb-2 block">Subtitle URLs</label>
+                <div><label className="text-[10px] uppercase tracking-wider text-white/30 mb-1 block">Video URL *</label><input value={ep.video_url} onChange={e => setEp({ ...ep, video_url: e.target.value })} placeholder="https://...mp4 or embed URL" className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-primary/30" /></div>
+                <div><label className="text-[10px] uppercase tracking-wider text-white/30 mb-1 block">Thumbnail URL</label><input value={ep.thumbnail_url} onChange={e => setEp({ ...ep, thumbnail_url: e.target.value })} placeholder="https://...jpg" className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-primary/30" /></div>
+                <div><label className="text-[10px] uppercase tracking-wider text-white/30 mb-1 block">Subtitles</label>
                     <div className="grid grid-cols-3 gap-3">
-                        <input type="url" placeholder="English .vtt" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-white placeholder-white/20 focus:outline-none focus:border-primary/30" />
-                        <input type="url" placeholder="Sinhala .vtt" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-white placeholder-white/20 focus:outline-none focus:border-primary/30" />
-                        <input type="url" placeholder="Tamil .vtt" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-white placeholder-white/20 focus:outline-none focus:border-primary/30" />
+                        <input value={ep.subtitle_en_url} onChange={e => setEp({ ...ep, subtitle_en_url: e.target.value })} placeholder="English .vtt" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-white placeholder-white/20 focus:outline-none focus:border-primary/30" />
+                        <input value={ep.subtitle_si_url} onChange={e => setEp({ ...ep, subtitle_si_url: e.target.value })} placeholder="Sinhala .vtt" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-white placeholder-white/20 focus:outline-none focus:border-primary/30" />
+                        <input value={ep.subtitle_ta_url} onChange={e => setEp({ ...ep, subtitle_ta_url: e.target.value })} placeholder="Tamil .vtt" className="w-full px-3 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-white placeholder-white/20 focus:outline-none focus:border-primary/30" />
                     </div>
                 </div>
-                <div className="border-2 border-dashed border-white/[0.06] rounded-2xl p-8 text-center cursor-pointer hover:border-primary/20 transition-colors group">
-                    <Upload className="w-10 h-10 text-white/10 mx-auto mb-3 group-hover:text-primary/30 transition-colors" />
-                    <p className="text-sm text-white/30 group-hover:text-white/50 transition-colors">Drop thumbnail here or click to upload</p>
-                    <p className="text-[10px] text-white/15 mt-1">PNG, JPG, WebP • Max 2MB</p>
-                </div>
-                <button className="w-full py-3.5 bg-gradient-to-r from-primary to-primary-600 rounded-xl text-sm font-medium shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
-                    <Upload className="w-4 h-4 inline mr-2" /> Upload Episode
+                <button onClick={handleUpload} disabled={saving} className="w-full py-3.5 bg-gradient-to-r from-primary to-primary-600 rounded-xl text-sm font-medium shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2">
+                    {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading...</> : <><Upload className="w-4 h-4" /> Upload Episode</>}
                 </button>
             </div>
         </div>
@@ -518,8 +548,8 @@ function UsersSection() {
                                 </td>
                                 <td className="p-4">
                                     <span className={`text-[10px] px-2 py-1 rounded-full ${u.role === 'Admin' ? 'bg-primary/10 text-primary' :
-                                            u.role === 'Mod' ? 'bg-purple/10 text-purple' :
-                                                'bg-blue-500/10 text-blue-400'
+                                        u.role === 'Mod' ? 'bg-purple/10 text-purple' :
+                                            'bg-blue-500/10 text-blue-400'
                                         }`}>{u.role}</span>
                                 </td>
                                 <td className="p-4 text-xs text-white/30">{u.joined}</td>
@@ -596,13 +626,13 @@ function FeedbackSection() {
                         <div className="flex-1">
                             <div className="flex flex-wrap items-center gap-2 mb-2">
                                 <span className={`text-[9px] px-2 py-0.5 rounded-full uppercase font-medium ${fb.type === 'bug' ? 'bg-red-500/10 text-red-400' :
-                                        fb.type === 'feature' ? 'bg-blue-500/10 text-blue-400' :
-                                            fb.type === 'compliment' ? 'bg-green-500/10 text-green-400' :
-                                                'bg-purple/10 text-purple'
+                                    fb.type === 'feature' ? 'bg-blue-500/10 text-blue-400' :
+                                        fb.type === 'compliment' ? 'bg-green-500/10 text-green-400' :
+                                            'bg-purple/10 text-purple'
                                     }`}>{fb.type}</span>
                                 <span className={`text-[9px] px-2 py-0.5 rounded-full ${fb.status === 'new' ? 'bg-yellow-500/10 text-yellow-400' :
-                                        fb.status === 'in_progress' ? 'bg-blue-500/10 text-blue-400' :
-                                            'bg-green-500/10 text-green-400'
+                                    fb.status === 'in_progress' ? 'bg-blue-500/10 text-blue-400' :
+                                        'bg-green-500/10 text-green-400'
                                     }`}>{fb.status.replace('_', ' ')}</span>
                                 <div className="flex gap-0.5 ml-1">{Array.from({ length: 5 }).map((_, s) => <Star key={s} className={`w-2.5 h-2.5 ${s < fb.rating ? 'text-yellow-400 fill-yellow-400' : 'text-white/10'}`} />)}</div>
                             </div>

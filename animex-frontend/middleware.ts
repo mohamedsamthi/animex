@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const protectedRoutes = ['/profile', '/admin'];
+const protectedRoutes = ['/profile']; // removed /admin for dev access
 const adminRoutes = ['/admin'];
 const authRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
 
